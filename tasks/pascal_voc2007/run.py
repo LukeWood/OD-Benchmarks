@@ -1,9 +1,9 @@
-import ml_experiments
-
 import keras_cv
-import loader
-import augmenters
+import ml_experiments
 import tensorflow as tf
+
+import augmenters
+import loader
 
 low, high = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
@@ -72,19 +72,37 @@ def get_backbone(config):
 
 def get_model(config):
     model = keras_cv.models.RetinaNet(
-        # number of classes to be used in box classification
         classes=20,
-        # For more info on supported bounding box formats, visit
-        # https://keras.io/api/keras_cv/bounding_box/
         bounding_box_format="xywh",
-        # KerasCV offers a set of pre-configured backbones
-        backbone=keras_cv.models.ResNet50(
-            include_top=False, weights="imagenet", include_rescaling=True
-        ).as_backbone(),
+        backbone=get_backbone(config),
     )
-    pass
+    model.backbone.trainable = config.backbone_trainable
+    return model
 
 
 def run(config):
     train_ds, eval_ds = load_datasets(config)
     model = get_model(config)
+
+    optimizer = tf.optimizers.SGD(global_clipnorm=10.0)
+    model.compile(
+        classification_loss="focal",
+        box_loss="smoothl1",
+        optimizer=optimizer,
+    )
+
+    history = model.fit(
+        train_ds,
+        validation_data=eval_ds,
+        epochs=EPOCHS,
+        callbacks=callbacks,
+    )
+
+    metrics = model.evaluate(eval_ds, return_dict=True)
+    return ml_experiments.Result(
+        name=config.experiment_name,
+        artifacts=[
+            ml_experiments.artifacts.KerasHistory(history, name="fit_history"),
+            ml_experiments.artifacts.Metrics(metrics, name="eval_metrics"),
+        ],
+    )
