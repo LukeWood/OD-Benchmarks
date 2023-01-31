@@ -13,7 +13,7 @@ def unpackage_tfds_inputs(inputs, bounding_box_format):
     return {"images": tf.cast(image, tf.float32), "bounding_boxes": bounding_boxes}
 
 
-def load_ds(split, bounding_box_format):
+def load(split, bounding_box_format):
     if split == "train":
         ds = tfds.load(
             "voc/2007", split="train+validation", with_info=False, shuffle_files=True

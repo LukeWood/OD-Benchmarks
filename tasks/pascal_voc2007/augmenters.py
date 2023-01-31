@@ -1,7 +1,7 @@
 from fn_augmenters import proc_train_function
 
 
-def get_augmenter(augmenter):
+def get(augmenter):
     if augmenter == "function":
         return proc_train_function("xywh")
     if augmenter == "kpl":
