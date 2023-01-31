@@ -8,5 +8,5 @@ def get_config():
     config.backbone = "keras.applications.ResNet50/imagenet"
     config.batch_augment = True
 
-    config.name = 'applications-imagenet-jpl'
+    config.name = 'applications-imagenet-kpl'
     return config

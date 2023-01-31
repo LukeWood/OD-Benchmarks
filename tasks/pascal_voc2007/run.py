@@ -16,10 +16,14 @@ config = config_flags.DEFINE_config_file('config')
 FLAGS = flags.FLAGS
 FLAGS(sys.argv)
 
-image_size = (224, 224, 3)
+image_size = (640, 640, 3)
 
 low, high = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
+
+
+def unpackage_dict_format(inputs):
+    return inputs['images'], inputs['bounding_boxes']
 
 
 def load_datasets(config):
@@ -52,6 +56,9 @@ def load_datasets(config):
 
     eval_ds = eval_ds.apply(tf.data.experimental.dense_to_ragged_batch(config.batch_size))
     eval_ds = eval_ds.map(inference_resizing, num_parallel_calls=tf.data.AUTOTUNE)
+
+    train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
+    eval_ds = eval_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
     return train_ds, eval_ds
 
 
@@ -93,6 +100,9 @@ def get_model(config):
     return model
 
 
+def get_name(config):
+    return f'{config.backbone}-{config.augmenter}'
+
 def run(config):
     train_ds, eval_ds = load_datasets(config)
     model = get_model(config)
@@ -105,19 +115,17 @@ def run(config):
     )
 
     history = model.fit(
-        train_ds,
-        validation_data=eval_ds,
-        epochs=EPOCHS,
-        callbacks=callbacks,
+        train_ds.take(1),
+        validation_data=eval_ds.take(1),
+        epochs=5,
+        # callbacks=callbacks,
     )
-
-    metrics = model.evaluate(eval_ds, return_dict=True)
+    # metrics = model.evaluate(eval_ds.take(1), return_dict=True)
     return ml_experiments.Result(
         # Must be generated for sweeps
-        name=config.experiment_name,
+        name=get_name(config),
         artifacts=[
             ml_experiments.artifacts.KerasHistory(history, name="fit_history"),
-            ml_experiments.artifacts.Metrics(metrics, name="eval_metrics"),
         ],
     )
 
