@@ -106,3 +106,7 @@ def run(config):
             ml_experiments.artifacts.Metrics(metrics, name="eval_metrics"),
         ],
     )
+
+if __name__ == "__main__":
+    # python run.py --config tactics/cfg1
+    ml_experiments.run(run)
