@@ -1,9 +1,22 @@
 import keras_cv
 import ml_experiments
 import tensorflow as tf
-
+import sys
 import augmenters
 import loader
+import resource
+from absl import flags
+from absl import app
+from tensorflow import keras
+
+from ml_collections import config_flags
+
+config = config_flags.DEFINE_config_file('config')
+
+FLAGS = flags.FLAGS
+FLAGS(sys.argv)
+
+image_size = (224, 224, 3)
 
 low, high = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
@@ -11,10 +24,10 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
 
 def load_datasets(config):
     train_ds = loader.load(
-        "train", batch_size=config.batch_size, bounding_box_format="xywh"
+        "train", bounding_box_format="xywh"
     )
     eval_ds = loader.load(
-        "test", batch_size=config.batch_size, bounding_box_format="xywh"
+        "test", bounding_box_format="xywh"
     )
 
     augmenter = augmenters.get(config.augmenter)
@@ -22,9 +35,9 @@ def load_datasets(config):
         640, 640, bounding_box_format="xywh", pad_to_aspect_ratio=True
     )
 
-    if batch_augment:
+    if config.batch_augment:
         train_ds = train_ds.apply(
-            tf.data.experimental.dense_to_ragged_batch(BATCH_SIZE)
+            tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
         train_ds = train_ds.map(
             lambda x: augmenter(x, training=True), num_parallel_calls=tf.data.AUTOTUNE
@@ -34,10 +47,10 @@ def load_datasets(config):
             lambda x: augment(x), num_parallel_calls=tf.data.AUTOTUNE
         )
         train_ds = train_ds.apply(
-            tf.data.experimental.dense_to_ragged_batch(BATCH_SIZE)
+            tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
 
-    eval_ds = eval_ds.apply(tf.data.experimental.dense_to_ragged_batch(BATCH_SIZE))
+    eval_ds = eval_ds.apply(tf.data.experimental.dense_to_ragged_batch(config.batch_size))
     eval_ds = eval_ds.map(inference_resizing, num_parallel_calls=tf.data.AUTOTUNE)
     return train_ds, eval_ds
 
@@ -76,7 +89,7 @@ def get_model(config):
         bounding_box_format="xywh",
         backbone=get_backbone(config),
     )
-    model.backbone.trainable = config.backbone_trainable
+    model.backbone.trainable = True#config.backbone_trainable
     return model
 
 
@@ -110,4 +123,4 @@ def run(config):
 
 if __name__ == "__main__":
     # python run.py --config tactics/cfg1
-    ml_experiments.run(run)
+    ml_experiments.run(run, FLAGS.config)

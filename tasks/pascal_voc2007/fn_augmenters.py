@@ -1,6 +1,6 @@
-import tensorflow tf
+import tensorflow as tf
 
-kk# TODO (lukewood): migrate to KPL, as this is mostly a duplciate of
+# TODO (lukewood): migrate to KPL, as this is mostly a duplciate of
 # https://github.com/tensorflow/models/blob/master/official/vision/ops/preprocess_ops.py#L138
 def resize_and_crop_image(
     image,
@@ -135,7 +135,7 @@ def flip_fn(image, boxes):
     return image, boxes
 
 
-def proc_train_fn(bounding_box_format, img_size):
+def make_train_function(bounding_box_format, img_size):
     def apply(inputs):
         image = inputs["image"]
         image = tf.cast(image, tf.float32)
@@ -158,7 +158,7 @@ def proc_train_fn(bounding_box_format, img_size):
     return apply
 
 
-def proc_eval_fn(bounding_box_format, target_size):
+def make_eval_function(bounding_box_format, target_size):
     def apply(inputs):
         raw_image = inputs["image"]
         raw_image = tf.cast(raw_image, tf.float32)
@@ -201,5 +201,3 @@ def proc_eval_fn(bounding_box_format, target_size):
         return image, bounding_boxes
 
     return apply
-
-

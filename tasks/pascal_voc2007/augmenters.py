@@ -1,9 +1,9 @@
-from fn_augmenters import proc_train_function
-
+from fn_augmenters import make_train_function
+import keras_cv
 
 def get(augmenter):
     if augmenter == "function":
-        return proc_train_function("xywh")
+        return make_train_function("xywh")
     if augmenter == "kpl":
         return keras_cv.layers.Augmenter(
             layers=[
