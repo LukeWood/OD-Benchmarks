@@ -100,6 +100,7 @@ def run(config):
 
     metrics = model.evaluate(eval_ds, return_dict=True)
     return ml_experiments.Result(
+        # Must be generated for sweeps
         name=config.experiment_name,
         artifacts=[
             ml_experiments.artifacts.KerasHistory(history, name="fit_history"),
