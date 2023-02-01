@@ -17,7 +17,9 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
 
 
 def unpackage_dict_format(inputs):
-    return inputs["images"], inputs["bounding_boxes"]
+    return inputs["images"], keras_cv.bounding_box.to_dense(
+        inputs["bounding_boxes"], max_boxes=32
+    )
 
 
 def load_datasets(config):
@@ -108,7 +110,7 @@ def run(config):
     )
 
     history = model.fit(
-        train_ds,
+        train_ds.take(1),
         validation_data=eval_ds.take(1),
         epochs=100,
         callbacks=[
