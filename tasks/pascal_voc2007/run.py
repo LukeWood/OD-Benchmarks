@@ -111,7 +111,6 @@ def run(config):
         learning_rate=lr_decay, momentum=0.9, global_clipnorm=10.0
     )
 
-    optimizer = tf.optimizers.SGD(global_clipnorm=10.0)
     model.compile(
         classification_loss="focal",
         box_loss="smoothl1",
