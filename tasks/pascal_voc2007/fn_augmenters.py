@@ -141,12 +141,17 @@ def make_train_function(bounding_box_format, img_size):
         boxes = keras_cv.bounding_box.convert_format(
             boxes, images=image, source=bounding_box_format, target="yxyx"
         )
+
         image, boxes = flip_fn(image, boxes)
         image, boxes, classes = resize_fn(image, boxes, classes)
+
         bounding_boxes = keras_cv.bounding_box.convert_format(
             boxes, images=image, source="yxyx", target=bounding_box_format
         )
         bounding_boxes = {"boxes": bounding_boxes, "classes": classes}
+        bounding_boxes = keras_cv.bounding_box.clip_to_image(
+            bounding_boxes, images=image, bounding_box_format=bounding_box_format
+        )
         return {"images": image, "bounding_boxes": bounding_boxes}
 
     return apply

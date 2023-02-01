@@ -52,6 +52,7 @@ def load_datasets(config):
 
     train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
     eval_ds = eval_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
+
     return train_ds, eval_ds
 
 
@@ -118,9 +119,7 @@ def run(config):
         train_ds,
         validation_data=eval_ds,
         epochs=50,
-        callbacks=[
-            PyCOCOCallback(eval_ds, "xywh"),
-        ],
+        callbacks=[PyCOCOCallback(eval_ds, "xywh"), keras.callbacks.TerminateOnNaN()],
     )
     # metrics = model.evaluate(eval_ds, return_dict=True)
     return ml_experiments.Result(
