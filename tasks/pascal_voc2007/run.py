@@ -31,7 +31,7 @@ def load_datasets(config):
         640, 640, bounding_box_format="xywh", pad_to_aspect_ratio=True
     )
 
-    if config.augmenter == 'kpl':
+    if config.augmenter == "kpl":
         train_ds = train_ds.apply(
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
@@ -45,7 +45,6 @@ def load_datasets(config):
         train_ds = train_ds.apply(
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
-
     eval_ds = eval_ds.apply(
         tf.data.experimental.dense_to_ragged_batch(config.batch_size)
     )
@@ -76,11 +75,9 @@ def get_backbone(config):
         ]
         return keras.Model(inputs=inputs, outputs=[c3_output, c4_output, c5_output])
     if config.backbone == "keras_cv.models.ResNet50-imagenet":
-        return (
-            keras_cv.models.ResNet50(
-                include_top=False, weights="imagenet", include_rescaling=True
-            ).as_backbone(),
-        )
+        return keras_cv.models.ResNet50(
+            include_top=False, weights="imagenet", include_rescaling=True
+        ).as_backbone()
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
 
 
