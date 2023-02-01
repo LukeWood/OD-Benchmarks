@@ -7,14 +7,13 @@ results = ml_experiments.Result.load_collection("artifacts/")
 
 all_dfs = []
 for result in results:
-    metrics = result.get("metrics")
     history = result.get("history").metrics
     mAP = np.array(history["val_AP"]).max()
     AR = np.array(history["val_ARmax100"]).max()
 
-    cols = [result.name] + [mAP, AR] + list(metrics.metrics.values())
+    cols = [result.name] + [mAP, AR]
     cols = [cols]
-    colheads = ["name"] + ["mAP", "Recall"] + list(metrics.metrics.keys())
+    colheads = ["name"] + ["mAP", "Recall"]
     all_dfs.append(pd.DataFrame(cols, columns=colheads))
 
 df = pd.concat(all_dfs)
