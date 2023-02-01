@@ -110,14 +110,14 @@ def run(config):
     )
 
     history = model.fit(
-        train_ds.take(1),
-        validation_data=eval_ds.take(1),
+        train_ds,
+        validation_data=eval_ds,
         epochs=100,
         callbacks=[
             PyCOCOCallback(eval_ds, "xywh"),
         ],
     )
-    metrics = model.evaluate(eval_ds.take(1), return_dict=True)
+    metrics = model.evaluate(eval_ds, return_dict=True)
     return ml_experiments.Result(
         # Must be generated for sweeps
         name=get_name(config),
