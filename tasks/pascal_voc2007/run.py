@@ -120,7 +120,7 @@ def run(config):
     history = model.fit(
         train_ds,
         validation_data=eval_ds,
-        epochs=100,
+        epochs=50,
         callbacks=[
             PyCOCOCallback(eval_ds, "xywh"),
         ],
