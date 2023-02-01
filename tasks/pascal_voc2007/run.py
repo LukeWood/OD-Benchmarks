@@ -125,12 +125,12 @@ def run(config):
             PyCOCOCallback(eval_ds, "xywh"),
         ],
     )
-    metrics = model.evaluate(eval_ds, return_dict=True)
+    # metrics = model.evaluate(eval_ds, return_dict=True)
     return ml_experiments.Result(
         # Must be generated for sweeps
         name=get_name(config),
         artifacts=[
             ml_experiments.artifacts.KerasHistory(history, name="history"),
-            ml_experiments.artifacts.Metrics(metrics, name="metrics"),
+            # ml_experiments.artifacts.Metrics(metrics, name="metrics"),
         ],
     )

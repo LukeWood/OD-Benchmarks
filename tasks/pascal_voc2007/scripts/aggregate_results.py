@@ -1,4 +1,5 @@
 import ml_experiments
+import numpy as np
 import luketils
 import pandas as pd
 
@@ -7,12 +8,14 @@ results = ml_experiments.Result.load_collection("artifacts/")
 all_dfs = []
 for result in results:
     metrics = result.get("metrics")
-    all_dfs.append(
-        pd.DataFrame(
-            [list(metrics.metrics.values()) + [result.name]],
-            columns=list(metrics.metrics.keys()) + ["name"],
-        )
-    )
+    history = result.get("history").metrics
+    mAP = np.array(history["val_AP"]).max()
+    AR = np.array(history["val_ARmax100"]).max()
+
+    cols = [result.name] + list(metrics.metrics.values())+ [mAP, AR]
+    cols = [cols]
+    colheads = ["name"] + list(metrics.metrics.keys()) + ["mAP", "Recall"]
+    all_dfs.append(pd.DataFrame(cols, columns=colheads))
 
 df = pd.concat(all_dfs)
 result = df.to_markdown()
@@ -22,9 +25,12 @@ with open("results/metrics.md", "w") as f:
 metrics_to_plot = {}
 
 for experiment in results:
-    metrics = experiment.get_artifact("history").metrics
-    metrics_to_plot[f"{experiment.name} MaP"] = metrics["MaP"]
-    metrics_to_plot[f"{experiment.name} Recall"] = metrics["Recall"]
+    metrics = experiment.get("history").metrics
+    print(metrics.keys())
+    metrics_to_plot[f"{experiment.name} MaP"] = np.array(metrics["val_AP"]).max()
+    metrics_to_plot[f"{experiment.name} Recall"] = np.array(
+        metrics["val_ARmax100"]
+    ).max()
 
 luketils.visualization.line_plot(
     metrics_to_plot,
