@@ -5,7 +5,7 @@ import ml_experiments
 def get_config():
     config = ml_collections.ConfigDict()
 
-    config.batch_size = 64
+    config.batch_size = 8
     config.augmenter = "kpl"
 
     config.backbone = ml_experiments.Sweep(
