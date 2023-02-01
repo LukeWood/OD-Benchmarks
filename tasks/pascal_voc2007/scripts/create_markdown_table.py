@@ -1,15 +1,19 @@
-import ml_collections
+import ml_experiments
 import pandas as pd
 
-results = ml_collections.Result.load_collection('artifacts/')
+results = ml_experiments.Result.load_collection("artifacts/")
 
-df = pd.DataFrame()
-
+all_dfs = []
 for result in results:
-    metrics = results.get('metrics')
-    # TODO(lukewood): index all columns, column headers etc
-    df[result.name] = metrics.as_dataframe_column()
+    metrics = result.get("metrics")
+    all_dfs.append(
+        pd.DataFrame(
+            [list(metrics.metrics.values()) + [result.name]],
+            columns=list(metrics.metrics.keys()) + ["name"],
+        )
+    )
 
+df = pd.concat(all_dfs)
 result = df.to_markdown()
 print(result)
 # TODO(lukewood): save as markdown table

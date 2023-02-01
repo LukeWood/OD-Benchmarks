@@ -17,16 +17,12 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
 
 
 def unpackage_dict_format(inputs):
-    return inputs['images'], inputs['bounding_boxes']
+    return inputs["images"], inputs["bounding_boxes"]
 
 
 def load_datasets(config):
-    train_ds = loader.load(
-        "train", bounding_box_format="xywh"
-    )
-    eval_ds = loader.load(
-        "test", bounding_box_format="xywh"
-    )
+    train_ds = loader.load("train", bounding_box_format="xywh")
+    eval_ds = loader.load("test", bounding_box_format="xywh")
 
     augmenter = augmenters.get(config.augmenter)
     inference_resizing = keras_cv.layers.Resizing(
@@ -48,7 +44,9 @@ def load_datasets(config):
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
 
-    eval_ds = eval_ds.apply(tf.data.experimental.dense_to_ragged_batch(config.batch_size))
+    eval_ds = eval_ds.apply(
+        tf.data.experimental.dense_to_ragged_batch(config.batch_size)
+    )
     eval_ds = eval_ds.map(inference_resizing, num_parallel_calls=tf.data.AUTOTUNE)
 
     train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
@@ -57,7 +55,7 @@ def load_datasets(config):
 
 
 def get_backbone(config):
-    if config.backbone == "keras.applications.ResNet50/imagenet":
+    if config.backbone == "keras.applications.ResNet50-imagenet":
         inputs = keras.layers.Input(shape=image_size)
         x = inputs
         x = keras.applications.resnet.preprocess_input(x)
@@ -75,7 +73,7 @@ def get_backbone(config):
             ]
         ]
         return keras.Model(inputs=inputs, outputs=[c3_output, c4_output, c5_output])
-    if config.backbone == "keras_cv.models.ResNet50/imagenet":
+    if config.backbone == "keras_cv.models.ResNet50-imagenet":
         return (
             keras_cv.models.ResNet50(
                 include_top=False, weights="imagenet", include_rescaling=True
@@ -90,12 +88,13 @@ def get_model(config):
         bounding_box_format="xywh",
         backbone=get_backbone(config),
     )
-    model.backbone.trainable = True#config.backbone_trainable
+    model.backbone.trainable = True  # config.backbone_trainable
     return model
 
 
 def get_name(config):
-    return f'{config.backbone}-{config.augmenter}'
+    return f"{config.backbone}-{config.augmenter}"
+
 
 def run(config):
     train_ds, eval_ds = load_datasets(config)
@@ -110,15 +109,16 @@ def run(config):
 
     history = model.fit(
         train_ds.take(1),
-        validation_data=eval_ds.take(1),
-        epochs=5,
+        #    validation_data=eval_ds.take(1),
+        epochs=1,
         # callbacks=callbacks,
     )
-    # metrics = model.evaluate(eval_ds.take(1), return_dict=True)
+    metrics = model.evaluate(eval_ds.take(1), return_dict=True)
     return ml_experiments.Result(
         # Must be generated for sweeps
         name=get_name(config),
         artifacts=[
-            ml_experiments.artifacts.KerasHistory(history, name="fit_history"),
+            ml_experiments.artifacts.KerasHistory(history, name="history"),
+            ml_experiments.artifacts.Metrics(metrics, name="metrics"),
         ],
     )

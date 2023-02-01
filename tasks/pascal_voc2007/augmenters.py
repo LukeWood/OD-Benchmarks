@@ -1,9 +1,10 @@
 from fn_augmenters import make_train_function
 import keras_cv
 
+
 def get(augmenter):
     if augmenter == "function":
-        return make_train_function("xywh", (640 ,640, 3))
+        return make_train_function("xywh", (640, 640, 3))
     if augmenter == "kpl":
         return keras_cv.layers.Augmenter(
             layers=[
