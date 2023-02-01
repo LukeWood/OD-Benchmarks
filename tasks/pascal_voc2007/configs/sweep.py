@@ -13,6 +13,5 @@ def get_config():
     )
     config.backbone_trainable = ml_experiments.Sweep([True, False])
 
-    config.batch_augment = True
     config.name = "applications-imagenet-kpl"
     return config

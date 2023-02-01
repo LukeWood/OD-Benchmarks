@@ -31,7 +31,7 @@ def load_datasets(config):
         640, 640, bounding_box_format="xywh", pad_to_aspect_ratio=True
     )
 
-    if config.batch_augment:
+    if config.augmenter == 'kpl':
         train_ds = train_ds.apply(
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
@@ -101,6 +101,15 @@ def get_name(config):
 def run(config):
     train_ds, eval_ds = load_datasets(config)
     model = get_model(config)
+
+    base_lr = 0.01
+    lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
+        boundaries=[12000 * 16, 16000 * 16],
+        values=[base_lr, 0.1 * base_lr, 0.01 * base_lr],
+    )
+    optimizer = tf.keras.optimizers.SGD(
+        learning_rate=lr_decay, momentum=0.9, global_clipnorm=10.0
+    )
 
     optimizer = tf.optimizers.SGD(global_clipnorm=10.0)
     model.compile(
