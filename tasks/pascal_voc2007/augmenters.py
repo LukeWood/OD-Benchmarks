@@ -3,7 +3,7 @@ import keras_cv
 
 def get(augmenter):
     if augmenter == "function":
-        return make_train_function("xywh")
+        return make_train_function("xywh", (640 ,640, 3))
     if augmenter == "kpl":
         return keras_cv.layers.Augmenter(
             layers=[
@@ -12,7 +12,7 @@ def get(augmenter):
                 ),
                 keras_cv.layers.JitteredResize(
                     target_size=(640, 640),
-                    scale_factor=(0.75, 1.3),
+                    scale_factor=(0.8, 1.25),
                     bounding_box_format="xywh",
                 ),
             ]

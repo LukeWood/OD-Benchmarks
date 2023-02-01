@@ -9,12 +9,6 @@ from absl import flags
 from absl import app
 from tensorflow import keras
 
-from ml_collections import config_flags
-
-config = config_flags.DEFINE_config_file('config')
-
-FLAGS = flags.FLAGS
-FLAGS(sys.argv)
 
 image_size = (640, 640, 3)
 
@@ -48,7 +42,7 @@ def load_datasets(config):
         )
     else:
         train_ds = train_ds.map(
-            lambda x: augment(x), num_parallel_calls=tf.data.AUTOTUNE
+            lambda x: augmenter(x), num_parallel_calls=tf.data.AUTOTUNE
         )
         train_ds = train_ds.apply(
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
@@ -128,7 +122,3 @@ def run(config):
             ml_experiments.artifacts.KerasHistory(history, name="fit_history"),
         ],
     )
-
-if __name__ == "__main__":
-    # python run.py --config tactics/cfg1
-    ml_experiments.run(run, FLAGS.config)

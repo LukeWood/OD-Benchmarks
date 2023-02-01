@@ -1,7 +1,6 @@
 import tensorflow as tf
+import keras_cv
 
-# TODO (lukewood): migrate to KPL, as this is mostly a duplciate of
-# https://github.com/tensorflow/models/blob/master/official/vision/ops/preprocess_ops.py#L138
 def resize_and_crop_image(
     image,
     desired_size,
@@ -116,7 +115,7 @@ def get_non_empty_box_indices(boxes):
 
 def resize_fn(image, boxes, classes):
     image, image_info = resize_and_crop_image(
-        image, image_size[:2], image_size[:2], 0.8, 1.25
+        image, (640, 640), (640, 640), 0.8, 1.25
     )
     boxes = resize_and_crop_boxes(
         boxes, image_info[2, :], image_info[1, :], image_info[3, :]
@@ -137,23 +136,19 @@ def flip_fn(image, boxes):
 
 def make_train_function(bounding_box_format, img_size):
     def apply(inputs):
-        image = inputs["image"]
-        image = tf.cast(image, tf.float32)
-        boxes = inputs["objects"]["bbox"]
-        image, boxes = flip_fn(image, boxes)
-        boxes = keras_cv.bounding_box.convert_format(
-            boxes,
-            images=image,
-            source="rel_yxyx",
-            target="yxyx",
+        image = inputs["images"]
+        boxes = inputs["bounding_boxes"]['boxes']
+        classes = inputs["bounding_boxes"]['classes']
+        bounding_boxes = keras_cv.bounding_box.convert_format(
+            boxes, images=image, source=bounding_box_format, target='yxyx'
         )
-        classes = tf.cast(inputs["objects"]["label"], tf.float32)
+        image, boxes = flip_fn(image, boxes)
         image, boxes, classes = resize_fn(image, boxes, classes)
         bounding_boxes = keras_cv.bounding_box.convert_format(
             boxes, images=image, source="yxyx", target=bounding_box_format
         )
         bounding_boxes = {"boxes": bounding_boxes, "classes": classes}
-        return image, bounding_boxes
+        return {'images': image, "bounding_boxes": bounding_boxes}
 
     return apply
 
