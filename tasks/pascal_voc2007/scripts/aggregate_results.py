@@ -12,9 +12,9 @@ for result in results:
     mAP = np.array(history["val_AP"]).max()
     AR = np.array(history["val_ARmax100"]).max()
 
-    cols = [result.name] + list(metrics.metrics.values())+ [mAP, AR]
+    cols = [result.name] + [mAP, AR] + list(metrics.metrics.values())
     cols = [cols]
-    colheads = ["name"] + list(metrics.metrics.keys()) + ["mAP", "Recall"]
+    colheads = ["name"] + ["mAP", "Recall"] + list(metrics.metrics.keys())
     all_dfs.append(pd.DataFrame(cols, columns=colheads))
 
 df = pd.concat(all_dfs)
@@ -26,15 +26,14 @@ metrics_to_plot = {}
 
 for experiment in results:
     metrics = experiment.get("history").metrics
-    print(metrics.keys())
-    metrics_to_plot[f"{experiment.name} MaP"] = np.array(metrics["val_AP"]).max()
+    metrics_to_plot[f"{experiment.name} MaP"] = np.array(metrics["val_AP"])
     metrics_to_plot[f"{experiment.name} Recall"] = np.array(
         metrics["val_ARmax100"]
-    ).max()
+    )
 
 luketils.visualization.line_plot(
     metrics_to_plot,
-    path=f"results/combined-accuracy.png",
+    path=f"results/map-recall-results.png",
     title="Metrics",
 )
 # TODO(lukewood): save as markdown table
