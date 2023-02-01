@@ -192,6 +192,6 @@ def make_eval_function(bounding_box_format, target_size):
         )
         classes = tf.cast(inputs["objects"]["label"], tf.float32)
         bounding_boxes = {"boxes": boxes, "classes": classes}
-        return image, bounding_boxes
+        return {"images": image, "bounding_boxes": bounding_boxes}
 
     return apply

@@ -8,6 +8,7 @@ def get_config():
     config.augmenter = "function"
     config.backbone = "keras_cv.models.ResNet50-imagenet"
     config.batch_augment = False
+    config.backbone_trainable = True
 
     config.name = "models-imagenet-fn"
     return config
