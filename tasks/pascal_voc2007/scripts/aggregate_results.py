@@ -27,9 +27,7 @@ metrics_to_plot = {}
 for experiment in results:
     metrics = experiment.get("history").metrics
     metrics_to_plot[f"{experiment.name} MaP"] = np.array(metrics["val_AP"])
-    metrics_to_plot[f"{experiment.name} Recall"] = np.array(
-        metrics["val_ARmax100"]
-    )
+    metrics_to_plot[f"{experiment.name} Recall"] = np.array(metrics["val_ARmax100"])
 
 luketils.visualization.line_plot(
     metrics_to_plot,
