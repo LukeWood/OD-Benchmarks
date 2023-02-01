@@ -8,7 +8,7 @@ import resource
 from absl import flags
 from absl import app
 from tensorflow import keras
-
+from keras_cv.callbacks import PyCOCOCallback
 
 image_size = (640, 640, 3)
 
@@ -88,12 +88,12 @@ def get_model(config):
         bounding_box_format="xywh",
         backbone=get_backbone(config),
     )
-    model.backbone.trainable = True  # config.backbone_trainable
+    model.backbone.trainable = config.backbone_trainable
     return model
 
 
 def get_name(config):
-    return f"{config.backbone}-{config.augmenter}"
+    return f"{config.backbone}-trainable={config.backbone_trainable}-{config.augmenter}"
 
 
 def run(config):
@@ -108,10 +108,12 @@ def run(config):
     )
 
     history = model.fit(
-        train_ds.take(1),
-        #    validation_data=eval_ds.take(1),
-        epochs=1,
-        # callbacks=callbacks,
+        train_ds,
+        validation_data=eval_ds.take(1),
+        epochs=100,
+        callbacks=[
+            PyCOCOCallback(eval_ds, "xywh"),
+        ],
     )
     metrics = model.evaluate(eval_ds.take(1), return_dict=True)
     return ml_experiments.Result(
