@@ -138,65 +138,26 @@ def make_train_function(bounding_box_format, img_size):
         image = inputs["images"]
         boxes = inputs["bounding_boxes"]["boxes"]
         classes = inputs["bounding_boxes"]["classes"]
+
         boxes = keras_cv.bounding_box.convert_format(
-            boxes, images=image, source=bounding_box_format, target="yxyx"
+            boxes, images=image, source=bounding_box_format, target="rel_yxyx"
         )
 
         image, boxes = flip_fn(image, boxes)
+
+        boxes = keras_cv.bounding_box.convert_format(
+            boxes, images=image, source="rel_yxyx", target="yxyx"
+        )
         image, boxes, classes = resize_fn(image, boxes, classes)
 
-        bounding_boxes = keras_cv.bounding_box.convert_format(
+        boxes = keras_cv.bounding_box.convert_format(
             boxes, images=image, source="yxyx", target=bounding_box_format
         )
-        bounding_boxes = {"boxes": bounding_boxes, "classes": classes}
+
+        bounding_boxes = {"boxes": boxes, "classes": classes}
         bounding_boxes = keras_cv.bounding_box.clip_to_image(
             bounding_boxes, images=image, bounding_box_format=bounding_box_format
         )
-        return {"images": image, "bounding_boxes": bounding_boxes}
-
-    return apply
-
-
-def make_eval_function(bounding_box_format, target_size):
-    def apply(inputs):
-        raw_image = inputs["image"]
-        raw_image = tf.cast(raw_image, tf.float32)
-
-        img_size = tf.shape(raw_image)
-        height = img_size[0]
-        width = img_size[1]
-
-        target_height = tf.cond(
-            height > width,
-            lambda: float(IMG_SIZE),
-            lambda: tf.cast(height / width * IMG_SIZE, tf.float32),
-        )
-        target_width = tf.cond(
-            width > height,
-            lambda: float(IMG_SIZE),
-            lambda: tf.cast(width / height * IMG_SIZE, tf.float32),
-        )
-        image = tf.image.resize(
-            raw_image, (target_height, target_width), antialias=False
-        )
-
-        boxes = keras_cv.bounding_box.convert_format(
-            inputs["objects"]["bbox"],
-            images=image,
-            source="rel_yxyx",
-            target="xyxy",
-        )
-        image = tf.image.pad_to_bounding_box(
-            image, 0, 0, target_size[0], target_size[1]
-        )
-        boxes = keras_cv.bounding_box.convert_format(
-            boxes,
-            images=image,
-            source="xyxy",
-            target=bounding_box_format,
-        )
-        classes = tf.cast(inputs["objects"]["label"], tf.float32)
-        bounding_boxes = {"boxes": boxes, "classes": classes}
         return {"images": image, "bounding_boxes": bounding_boxes}
 
     return apply

@@ -9,6 +9,8 @@ from absl import flags
 from absl import app
 from tensorflow import keras
 from keras_cv.callbacks import PyCOCOCallback
+import os
+from luketils import visualization
 
 image_size = (640, 640, 3)
 
@@ -22,13 +24,15 @@ def unpackage_dict_format(inputs):
     )
 
 
-def load_datasets(config):
-    train_ds = loader.load("train", bounding_box_format="xywh")
-    eval_ds = loader.load("test", bounding_box_format="xywh")
+def load_datasets(config, bounding_box_format):
+    train_ds = loader.load("train", bounding_box_format=bounding_box_format)
+    eval_ds = loader.load("test", bounding_box_format=bounding_box_format)
 
-    augmenter = augmenters.get(config.augmenter)
+    augmenter = augmenters.get(
+        config.augmenter, bounding_box_format=bounding_box_format
+    )
     inference_resizing = keras_cv.layers.Resizing(
-        640, 640, bounding_box_format="xywh", pad_to_aspect_ratio=True
+        640, 640, bounding_box_format=bounding_box_format, pad_to_aspect_ratio=True
     )
 
     if config.augmenter == "kpl":
@@ -96,10 +100,65 @@ def get_name(config):
     return f"{config.backbone}-trainable={config.backbone_trainable}-{config.augmenter}"
 
 
+class_ids = [
+    "Aeroplane",
+    "Bicycle",
+    "Bird",
+    "Boat",
+    "Bottle",
+    "Bus",
+    "Car",
+    "Cat",
+    "Chair",
+    "Cow",
+    "Dining Table",
+    "Dog",
+    "Horse",
+    "Motorbike",
+    "Person",
+    "Potted Plant",
+    "Sheep",
+    "Sofa",
+    "Train",
+    "Tvmonitor",
+    "Total",
+]
+class_mapping = dict(zip(range(len(class_ids)), class_ids))
+
+
+def visualize_dataset(dataset, bounding_box_format, path):
+    sample = next(iter(dataset))
+    images, boxes = sample
+    visualization.plot_bounding_box_gallery(
+        images,
+        value_range=(0, 255),
+        bounding_box_format=bounding_box_format,
+        y_true=boxes,
+        scale=4,
+        rows=2,
+        cols=2,
+        thickness=4,
+        font_scale=1,
+        class_mapping=class_mapping,
+        path=path,
+    )
+
+
 def run(config):
-    train_ds, eval_ds = load_datasets(config)
+    train_ds, eval_ds = load_datasets(config, bounding_box_format="xywh")
     model = get_model(config)
 
+    name = get_name(config)
+    result_dir = f"artifacts/{name}"
+    os.makedirs(result_dir, exist_ok=True)
+
+    visualize_dataset(
+        train_ds, bounding_box_format="xywh", path=f"{result_dir}/train.png"
+    )
+    visualize_dataset(
+        eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
+    )
+    return
     base_lr = 0.01
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[12000 * 16, 16000 * 16],
@@ -124,9 +183,10 @@ def run(config):
     # metrics = model.evaluate(eval_ds, return_dict=True)
     return bocas.Result(
         # Must be generated for sweeps
-        name=get_name(config),
+        name=name,
+        config=config,
         artifacts=[
             bocas.artifacts.KerasHistory(history, name="history"),
-            # bocas.artifacts.Metrics(metrics, name="metrics"),
+            bocas.artifacts.Metrics(metrics, name="metrics"),
         ],
     )

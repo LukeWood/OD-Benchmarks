@@ -8,6 +8,7 @@ def get_config():
     config.augmenter = "kpl"
     config.backbone = "keras.applications.ResNet50-imagenet"
     config.batch_augment = True
+    config.backbone_trainable = False
 
     config.name = "applications-imagenet-kpl"
     return config
