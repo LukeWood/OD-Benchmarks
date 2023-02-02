@@ -1,5 +1,6 @@
 import keras_cv
 import bocas
+import termcolor
 import tensorflow as tf
 import sys
 import augmenters
@@ -145,10 +146,14 @@ def visualize_dataset(dataset, bounding_box_format, path):
 
 
 def run(config):
+    name = get_name(config)
+
+    termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
+    termcolor.cprint(termcolor.colored(f"Training model: {name}", "light_green"))
+    termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
     train_ds, eval_ds = load_datasets(config, bounding_box_format="xywh")
     model = get_model(config)
 
-    name = get_name(config)
     result_dir = f"artifacts/{name}"
     os.makedirs(result_dir, exist_ok=True)
 
