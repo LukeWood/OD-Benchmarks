@@ -158,7 +158,7 @@ def run(config):
     visualize_dataset(
         eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
     )
-    return
+
     base_lr = 0.01
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[12000 * 16, 16000 * 16],
