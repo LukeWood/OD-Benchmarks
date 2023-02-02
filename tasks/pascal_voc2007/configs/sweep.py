@@ -10,6 +10,5 @@ def get_config():
     config.backbone = bocas.Sweep(
         ["keras.applications.ResNet50-imagenet", "keras_cv.models.ResNet50-imagenet"]
     )
-    config.backbone_trainable = True
-    # config.backbone_trainable = bocas.Sweep([True, False])
+    config.backbone_trainable = bocas.Sweep([True, False])
     return config
