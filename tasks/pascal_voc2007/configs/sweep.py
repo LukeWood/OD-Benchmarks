@@ -1,5 +1,5 @@
 import ml_collections
-import ml_experiments
+import bocas
 
 
 def get_config():
@@ -8,10 +8,10 @@ def get_config():
     config.batch_size = 8
     config.augmenter = "kpl"
     config.backbone = "keras_cv.models.ResNet50-imagenet"
-    #    config.backbone = ml_experiments.Sweep(
+    #    config.backbone = bocas.Sweep(
     #        ["keras.applications.ResNet50-imagenet", "keras_cv.models.ResNet50-imagenet"]
     #    )
-    config.backbone_trainable = ml_experiments.Sweep([True, False])
+    config.backbone_trainable = bocas.Sweep([True, False])
 
     config.name = "applications-imagenet-kpl"
     return config

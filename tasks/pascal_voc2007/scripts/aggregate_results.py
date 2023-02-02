@@ -1,9 +1,9 @@
-import ml_experiments
+import bocas
 import numpy as np
 import luketils
 import pandas as pd
 
-results = ml_experiments.Result.load_collection("artifacts/")
+results = bocas.Result.load_collection("artifacts/")
 
 all_dfs = []
 for result in results:

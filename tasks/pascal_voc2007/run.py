@@ -1,5 +1,5 @@
 import keras_cv
-import ml_experiments
+import bocas
 import tensorflow as tf
 import sys
 import augmenters
@@ -122,11 +122,11 @@ def run(config):
         callbacks=[PyCOCOCallback(eval_ds, "xywh"), keras.callbacks.TerminateOnNaN()],
     )
     # metrics = model.evaluate(eval_ds, return_dict=True)
-    return ml_experiments.Result(
+    return bocas.Result(
         # Must be generated for sweeps
         name=get_name(config),
         artifacts=[
-            ml_experiments.artifacts.KerasHistory(history, name="history"),
-            # ml_experiments.artifacts.Metrics(metrics, name="metrics"),
+            bocas.artifacts.KerasHistory(history, name="history"),
+            # bocas.artifacts.Metrics(metrics, name="metrics"),
         ],
     )
