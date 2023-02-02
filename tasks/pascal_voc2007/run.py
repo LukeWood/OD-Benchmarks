@@ -192,6 +192,5 @@ def run(config):
         config=config,
         artifacts=[
             bocas.artifacts.KerasHistory(history, name="history"),
-            bocas.artifacts.Metrics(metrics, name="metrics"),
         ],
     )
