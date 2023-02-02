@@ -149,7 +149,7 @@ def run(config):
     name = get_name(config)
 
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
-    termcolor.cprint(termcolor.colored(f"Training model: {name}", "light_green"))
+    termcolor.cprint(termcolor.colored(f"Training model: {name}", "green", attrs=["bold"]))
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
     train_ds, eval_ds = load_datasets(config, bounding_box_format="xywh")
     model = get_model(config)
