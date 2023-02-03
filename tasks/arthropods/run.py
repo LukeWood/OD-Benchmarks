@@ -26,8 +26,8 @@ def unpackage_dict_format(inputs):
 
 
 def load_datasets(config, bounding_box_format):
-    train_ds = loader.load("train", bounding_box_format=bounding_box_format)
-    eval_ds = loader.load("test", bounding_box_format=bounding_box_format)
+    train_ds, num_train = loader.load("train", bounding_box_format=bounding_box_format)
+    eval_ds, num_test = loader.load("test", bounding_box_format=bounding_box_format)
 
     augmenter = augmenters.get(
         config.augmenter, bounding_box_format=bounding_box_format
@@ -50,7 +50,7 @@ def load_datasets(config, bounding_box_format):
     train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
     eval_ds = eval_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
 
-    return train_ds, eval_ds
+    return train_ds, eval_ds, num_train, num_test
 
 
 def get_backbone(config):
@@ -145,7 +145,7 @@ def run(config):
         termcolor.colored(f"Training model: {name}", "green", attrs=["bold"])
     )
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
-    train_ds, eval_ds = load_datasets(config, bounding_box_format="xywh")
+    train_ds, eval_ds, num_train, num_test = load_datasets(config, bounding_box_format="xywh")
     model = get_model(config)
 
     result_dir = f"artifacts/{name}"
@@ -158,9 +158,12 @@ def run(config):
         eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
     )
 
-    base_lr = 0.01
+    train_steps_per_epoch = num_train // config.batch_size
+    test_steps_per_epoch = num_test // config.batch_size
+
+    base_lr = 0.05
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
-        boundaries=[12000 * 16, 16000 * 16],
+        boundaries=[train_steps_per_epoch * 16, train_steps_per_epoch * 32],
         values=[base_lr, 0.1 * base_lr, 0.01 * base_lr],
     )
     optimizer = tf.keras.optimizers.SGD(
