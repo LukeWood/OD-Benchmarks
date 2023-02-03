@@ -1,6 +1,4 @@
 import keras_cv
-from fn_augmenters import make_train_function
-
 
 def get(augmenter, bounding_box_format):
     if augmenter == "basic":

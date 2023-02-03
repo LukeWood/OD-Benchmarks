@@ -1,6 +1,8 @@
 import keras_cv
 import tensorflow as tf
 import tensorflow_datasets as tfds
+import re
+import numpy as np
 
 TRAIN_DATA = (
     "gs://practical-ml-vision-book/arthropod_detection_tfr/size_w1024px/*.train.tfrec"
@@ -9,29 +11,6 @@ VALID_DATA = (
     "gs://practical-ml-vision-book/arthropod_detection_tfr/size_w1024px/*.test.tfrec"
 )
 
-CLASSES = [
-    "Lepidoptera",
-    "Hymenoptera",
-    "Hemiptera",
-    "Odonata",
-    "Diptera",
-    "Araneae",
-    "Coleoptera",
-    "_truncated",
-    "_blurred",
-    "_occluded",
-]
-
-CLASSES = [
-    klass
-    for klass in RAW_CLASSES
-    if klass
-    not in [
-        "_truncated",
-        "_blurred",
-        "_occluded",
-    ]
-]
 AUTO = tf.data.AUTOTUNE
 
 features = tfds.features.FeaturesDict(
@@ -61,7 +40,7 @@ features = tfds.features.FeaturesDict(
 )
 
 
-def unpackage_raw_inputs(inputs, bounding_box_format):
+def unpackage_raw_inputs(data, bounding_box_format):
     # get the image, which is no longer encoded here thanks to tfds.features.Image
     image = data["image/encoded"]
     # boxes extracted in rel_xyxy format

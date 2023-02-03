@@ -64,7 +64,7 @@ def get_backbone(config):
 def get_model(config):
     if config.od_model == "RetinaNet":
         model = keras_cv.models.RetinaNet(
-            classes=20,
+            classes=len(class_ids),
             bounding_box_format="xywh",
             backbone=get_backbone(config),
         )
@@ -78,28 +78,15 @@ def get_name(config):
 
 
 class_ids = [
-    "Aeroplane",
-    "Bicycle",
-    "Bird",
-    "Boat",
-    "Bottle",
-    "Bus",
-    "Car",
-    "Cat",
-    "Chair",
-    "Cow",
-    "Dining Table",
-    "Dog",
-    "Horse",
-    "Motorbike",
-    "Person",
-    "Potted Plant",
-    "Sheep",
-    "Sofa",
-    "Train",
-    "Tvmonitor",
-    "Total",
+    "Lepidoptera",
+    "Hymenoptera",
+    "Hemiptera",
+    "Odonata",
+    "Diptera",
+    "Araneae",
+    "Coleoptera",
 ]
+
 class_mapping = dict(zip(range(len(class_ids)), class_ids))
 
 
