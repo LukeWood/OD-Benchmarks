@@ -1,5 +1,5 @@
-import tensorflow as tf
 import keras_cv
+import tensorflow as tf
 
 
 def resize_and_crop_image(

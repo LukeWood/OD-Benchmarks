@@ -1,17 +1,17 @@
-import keras_cv
-import bocas
-import termcolor
-import tensorflow as tf
-import sys
-import augmenters
-import loader
-import resource
-from absl import flags
-from absl import app
-from tensorflow import keras
-from keras_cv.callbacks import PyCOCOCallback
 import os
+import resource
+import sys
+
+import augmenters
+import bocas
+import keras_cv
+import loader
+import tensorflow as tf
+import termcolor
+from absl import app, flags
+from keras_cv.callbacks import PyCOCOCallback
 from luketils import visualization
+from tensorflow import keras
 
 image_size = (640, 640, 3)
 
@@ -54,39 +54,23 @@ def load_datasets(config, bounding_box_format):
 
 
 def get_backbone(config):
-    if config.backbone == "keras.applications.ResNet50-imagenet":
-        inputs = keras.layers.Input(shape=image_size)
-        x = inputs
-        x = keras.applications.resnet.preprocess_input(x)
-
-        backbone = keras.applications.ResNet50(
-            include_top=False, input_tensor=x, weights="imagenet"
-        )
-
-        c3_output, c4_output, c5_output = [
-            backbone.get_layer(layer_name).output
-            for layer_name in [
-                "conv3_block4_out",
-                "conv4_block6_out",
-                "conv5_block3_out",
-            ]
-        ]
-        return keras.Model(inputs=inputs, outputs=[c3_output, c4_output, c5_output])
-    if config.backbone == "keras_cv.models.ResNet50-imagenet":
+    if config.backbone == "ResNet50":
         return keras_cv.models.ResNet50(
-            include_top=False, weights="imagenet", include_rescaling=True
+            include_top=False, weights=config.weights, include_rescaling=True
         ).as_backbone()
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
 
 
 def get_model(config):
-    model = keras_cv.models.RetinaNet(
-        classes=20,
-        bounding_box_format="xywh",
-        backbone=get_backbone(config),
-    )
-    model.backbone.trainable = config.backbone_trainable
-    return model
+    if config.od_model == "RetinaNet":
+        model = keras_cv.models.RetinaNet(
+            classes=20,
+            bounding_box_format="xywh",
+            backbone=get_backbone(config),
+        )
+        model.backbone.trainable = config.backbone_trainable
+        return model
+    raise ValueError(f"Invalid OD Model: {config.od_model}")
 
 
 def get_name(config):
@@ -145,7 +129,9 @@ def run(config):
         termcolor.colored(f"Training model: {name}", "green", attrs=["bold"])
     )
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
-    train_ds, eval_ds, num_train, num_test = load_datasets(config, bounding_box_format="xywh")
+    train_ds, eval_ds, num_train, num_test = load_datasets(
+        config, bounding_box_format="xywh"
+    )
     model = get_model(config)
 
     result_dir = f"artifacts/{name}"

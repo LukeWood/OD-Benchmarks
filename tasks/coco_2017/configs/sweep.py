@@ -1,5 +1,5 @@
-import ml_collections
 import bocas
+import ml_collections
 
 
 def get_config():

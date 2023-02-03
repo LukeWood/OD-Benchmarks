@@ -1,17 +1,17 @@
-import keras_cv
-import bocas
-import termcolor
-import tensorflow as tf
-import sys
-import augmenters
-import loader
-import resource
-from absl import flags
-from absl import app
-from tensorflow import keras
-from keras_cv.callbacks import PyCOCOCallback
 import os
+import resource
+import sys
+
+import augmenters
+import bocas
+import keras_cv
+import loader
+import tensorflow as tf
+import termcolor
+from absl import app, flags
+from keras_cv.callbacks import PyCOCOCallback
 from luketils import visualization
+from tensorflow import keras
 
 image_size = (640, 640, 3)
 

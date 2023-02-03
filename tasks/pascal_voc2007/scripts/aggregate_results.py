@@ -1,6 +1,6 @@
 import bocas
-import numpy as np
 import luketils
+import numpy as np
 import pandas as pd
 
 results = bocas.Result.load_collection("artifacts/")
