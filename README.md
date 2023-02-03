@@ -12,14 +12,10 @@ questions:
 This repo attempts to answer all of these questions through extensive empirical
 experimentation.
 
-## Repo Structure
+# Tasks:
 
-The repo is structured as follows:
+Current tasks implements:
 
-- lib/ contains generic components, such as the logic to run augmentation, fit(), etc
-- each experiment exists in a subdirectory of experiments/
-- any configuration for experiments should live in this directory
-
-## Results
-
-Results are aggregated into a few files, this is still sort of a TODO
+- [PascalVOC](tasks/pascal_voc2007)
+    - [Results](https://github.com/LukeWood/OD-Benchmarks/blob/master/tasks/pascal_voc2007/results/metrics.md)
+- [Arthropods](tasks/arthropods) (results training now)
