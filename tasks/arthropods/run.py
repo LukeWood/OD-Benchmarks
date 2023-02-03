@@ -35,21 +35,13 @@ def load_datasets(config, bounding_box_format):
     inference_resizing = keras_cv.layers.Resizing(
         640, 640, bounding_box_format=bounding_box_format, pad_to_aspect_ratio=True
     )
+    train_ds = train_ds.apply(
+        tf.data.experimental.dense_to_ragged_batch(config.batch_size)
+    )
+    train_ds = train_ds.map(
+        lambda x: augmenter(x, training=True), num_parallel_calls=tf.data.AUTOTUNE
+    )
 
-    if config.augmenter == "kpl":
-        train_ds = train_ds.apply(
-            tf.data.experimental.dense_to_ragged_batch(config.batch_size)
-        )
-        train_ds = train_ds.map(
-            lambda x: augmenter(x, training=True), num_parallel_calls=tf.data.AUTOTUNE
-        )
-    else:
-        train_ds = train_ds.map(
-            lambda x: augmenter(x), num_parallel_calls=tf.data.AUTOTUNE
-        )
-        train_ds = train_ds.apply(
-            tf.data.experimental.dense_to_ragged_batch(config.batch_size)
-        )
     eval_ds = eval_ds.apply(
         tf.data.experimental.dense_to_ragged_batch(config.batch_size)
     )
@@ -83,12 +75,6 @@ def get_backbone(config):
     if config.backbone == "keras_cv.models.ResNet50-imagenet":
         return keras_cv.models.ResNet50(
             include_top=False, weights="imagenet", include_rescaling=True
-        ).as_backbone()
-    if config.backbone == "keras_cv.models.ResNet50-imagenet":
-        return keras_cv.models.ResNet50(
-            include_top=False,
-            weights="gs://keras-cv/models/resnet50/openimages-simsiam-v0.h5",
-            include_rescaling=True,
         ).as_backbone()
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
 
