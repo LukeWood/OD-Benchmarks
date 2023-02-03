@@ -9,7 +9,7 @@ def unpackage_raw_tfds(inputs, bounding_box_format):
     labels = inputs["objects"]["label"]
     bounding_boxes = {"boxes": boxes, "classes": labels}
     bounding_boxes = keras_cv.bounding_box.convert_format(
-        bounding_boxes, source="rel_xyxy", target=bounding_box_format, images=image
+        bounding_boxes, source="rel_yxyx", target=bounding_box_format, images=image
     )
     return {"images": image, "bounding_boxes": bounding_boxes}
 
