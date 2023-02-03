@@ -84,7 +84,7 @@ def get_backbone(config):
         return keras_cv.models.ResNet50(
             include_top=False, weights="imagenet", include_rescaling=True
         ).as_backbone()
-    if config.backbone == "keras_cv.models.ResNet50-imagenet":
+    if config.backbone == "keras_cv.models.ResNet50-simsiam.openimages-prototype":
         return keras_cv.models.ResNet50(
             include_top=False,
             weights="gs://keras-cv/models/resnet50/openimages-simsiam-v0.h5",
