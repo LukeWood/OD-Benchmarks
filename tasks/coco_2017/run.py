@@ -11,6 +11,7 @@ from absl import app
 from tensorflow import keras
 from keras_cv.callbacks import PyCOCOCallback
 import os
+from luketils import visualization
 
 image_size = (640, 640, 3)
 
@@ -130,6 +131,14 @@ def run(config):
 
     result_dir = f"artifacts/{name}"
     os.makedirs(result_dir, exist_ok=True)
+
+
+    visualize_dataset(
+        train_ds, bounding_box_format="xywh", path=f"{result_dir}/train.png"
+    )
+    visualize_dataset(
+        eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
+    )
 
     base_lr = 0.01
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
