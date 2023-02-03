@@ -137,7 +137,7 @@ def run(config):
     train_steps_per_epoch = num_train // config.batch_size
     test_steps_per_epoch = num_test // config.batch_size
 
-    base_lr = 0.05
+    base_lr = 0.025
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[train_steps_per_epoch * 16, train_steps_per_epoch * 32],
         values=[base_lr, 0.1 * base_lr, 0.01 * base_lr],
