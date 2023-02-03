@@ -20,5 +20,5 @@ def load(split, bounding_box_format):
         lambda x: unpackage_raw_tfds(x, bounding_box_format=bounding_box_format),
         num_parallel_calls=tf.data.AUTOTUNE,
     )
-    train_ds = train_ds.filter(lambda x: tf.shape(x['bounding_boxes']['classes'])[0] > 0)
+    # train_ds = train_ds.filter(lambda x: tf.shape(x['bounding_boxes']['classes'])[0] > 0)
     return train_ds
