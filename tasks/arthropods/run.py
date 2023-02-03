@@ -29,6 +29,9 @@ def load_datasets(config, bounding_box_format):
     train_ds, num_train = loader.load("train", bounding_box_format=bounding_box_format)
     eval_ds, num_test = loader.load("test", bounding_box_format=bounding_box_format)
 
+    train_ds = train_ds.shuffle(1024)
+    eval_ds = eval_ds.shuffle(1024)
+
     augmenter = augmenters.get(
         config.augmenter, bounding_box_format=bounding_box_format
     )
@@ -153,7 +156,10 @@ def run(config):
         train_ds,
         validation_data=eval_ds,
         epochs=50,
-        callbacks=[PyCOCOCallback(eval_ds, "xywh"), keras.callbacks.TerminateOnNaN()],
+        callbacks=[
+            PyCOCOCallback(eval_ds.take(200), "xywh"),
+            keras.callbacks.TerminateOnNaN(),
+        ],
     )
     # metrics = model.evaluate(eval_ds, return_dict=True)
     return bocas.Result(
