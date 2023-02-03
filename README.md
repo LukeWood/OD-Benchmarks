@@ -14,7 +14,7 @@ experimentation.
 
 # Tasks:
 
-Current tasks implements:
+Current tasks implemented:
 
 - [PascalVOC](tasks/pascal_voc2007)
     - [Results](https://github.com/LukeWood/OD-Benchmarks/blob/master/tasks/pascal_voc2007/results/metrics.md)
