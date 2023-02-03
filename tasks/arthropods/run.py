@@ -154,10 +154,9 @@ def run(config):
 
     history = model.fit(
         train_ds,
-        validation_data=eval_ds,
         epochs=50,
         callbacks=[
-            PyCOCOCallback(eval_ds.take(200), "xywh"),
+            PyCOCOCallback(eval_ds, "xywh"),
             keras.callbacks.TerminateOnNaN(),
         ],
     )
