@@ -124,7 +124,9 @@ def run(config):
     name = get_name(config)
 
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
-    termcolor.cprint(termcolor.colored(f"Training model: {name}", "green", attrs=["bold"]))
+    termcolor.cprint(
+        termcolor.colored(f"Training model: {name}", "green", attrs=["bold"])
+    )
     termcolor.cprint(termcolor.colored("#" * 10, "cyan"))
     train_ds, eval_ds = load_datasets(config, bounding_box_format="xywh")
     model = get_model(config)
@@ -132,13 +134,13 @@ def run(config):
     result_dir = f"artifacts/{name}"
     os.makedirs(result_dir, exist_ok=True)
 
-
     visualize_dataset(
         train_ds, bounding_box_format="xywh", path=f"{result_dir}/train.png"
     )
     visualize_dataset(
         eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
     )
+    return
 
     base_lr = 0.01
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(

@@ -2,7 +2,7 @@ import keras_cv
 
 
 def get(augmenter, bounding_box_format):
-    if augmenter =='basic':
+    if augmenter == "basic":
         return keras_cv.layers.Augmenter(
             layers=[
                 keras_cv.layers.RandomFlip(
