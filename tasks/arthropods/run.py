@@ -21,7 +21,7 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (high, high))
 
 def unpackage_dict_format(inputs):
     return inputs["images"], keras_cv.bounding_box.to_dense(
-        inputs["bounding_boxes"], max_boxes=32
+        inputs["bounding_boxes"], max_boxes=50
     )
 
 
@@ -139,7 +139,7 @@ def run(config):
 
     base_lr = 0.025
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
-        boundaries=[train_steps_per_epoch * 16, train_steps_per_epoch * 32],
+        boundaries=[train_steps_per_epoch * 16, train_steps_per_epoch * 22],
         values=[base_lr, 0.1 * base_lr, 0.01 * base_lr],
     )
     optimizer = tf.keras.optimizers.SGD(
@@ -154,11 +154,8 @@ def run(config):
 
     history = model.fit(
         train_ds,
-        epochs=50,
-        callbacks=[
-            PyCOCOCallback(eval_ds, "xywh"),
-            keras.callbacks.TerminateOnNaN(),
-        ],
+        epochs=30,
+        callbacks=[PyCOCOCallback(eval_ds, "xywh"), keras.callbacks.TerminateOnNaN()],
     )
     # metrics = model.evaluate(eval_ds, return_dict=True)
     return bocas.Result(
