@@ -20,6 +20,10 @@ for result in results:
     cols += [prts[0]]
     colheads += ["backbone"]
 
+    cols += [config.backbone_trainable]
+    colheads += ["backbone trainable"]
+
+
     cols += [prts[1]]
     colheads += ["weights"]
 
