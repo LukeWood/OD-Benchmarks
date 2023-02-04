@@ -20,7 +20,7 @@ for result in results:
     cols += [prts[0]]
     colheads += ["backbone"]
 
-    cols += [prts[1]]
+    cols += [config.weights]
     colheads += ["weights"]
 
     cols += [config.augmenter]
@@ -37,6 +37,7 @@ for result in results:
 
 df = pd.concat(all_dfs)
 result = df.to_markdown()
+
 with open("results/metrics.md", "w") as f:
     f.write("# PascalVOC Results\n")
     f.write(result)
