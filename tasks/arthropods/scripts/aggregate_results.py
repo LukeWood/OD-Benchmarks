@@ -39,7 +39,7 @@ df = pd.concat(all_dfs)
 result = df.to_markdown()
 
 with open("results/metrics.md", "w") as f:
-    f.write("# PascalVOC Results\n")
+    f.write("# Arthropods Results\n")
     f.write(result)
 
 metrics_to_plot = {}
