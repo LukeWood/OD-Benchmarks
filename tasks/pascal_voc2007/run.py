@@ -98,7 +98,7 @@ def get_backbone(config):
 
 
 def get_model(config):
-    model =     model = keras_cv.models.YoloX_tiny(
+    model = keras_cv.models.YoloX_tiny(
         classes=20,
         bounding_box_format="xywh",
         backbone=get_backbone(config),
