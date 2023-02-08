@@ -90,11 +90,15 @@ def get_backbone(config):
             weights="gs://keras-cv/models/resnet50/openimages-simsiam-v0.h5",
             include_rescaling=True,
         ).as_backbone()
+    if config.backbone == "keras_cv.models.CSPDarkNetTiny":
+        return keras_cv.models.CSPDarkNetTiny(
+            include_rescaling=False, include_top=False, weights="imagenet"
+        ).as_backbone(min_level=3) 
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
 
 
 def get_model(config):
-    model = keras_cv.models.RetinaNet(
+    model =     model = keras_cv.models.YoloX_tiny(
         classes=20,
         bounding_box_format="xywh",
         backbone=get_backbone(config),
