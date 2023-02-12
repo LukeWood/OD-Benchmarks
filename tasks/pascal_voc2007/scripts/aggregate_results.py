@@ -33,6 +33,15 @@ for result in results:
     cols += [np.array(history["loss"]).max()]
     colheads += ["loss"]
 
+    cols += [np.array(history["val_loss"]).max()]
+    colheads += ["val_loss"]
+
+    cols += [np.array(history["val_classification_loss"]).max()]
+    colheads += ["val_classification_loss"]
+
+    cols += [np.array(history["val_box_loss"]).max()]
+    colheads += ["val_box_loss"]
+
     cols += [mAP, AR]
     colheads += ["mAP", "Recall"]
 
