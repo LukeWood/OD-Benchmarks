@@ -87,7 +87,7 @@ def get_backbone(config):
     if config.backbone == "keras_cv.models.ResNet50-simsiam.openimages-prototype":
         return keras_cv.models.ResNet50(
             include_top=False,
-            weights="gs://keras-cv/models/resnet50/openimages-simsiam-v0.h5",
+            weights="gs://keras-cv/models/resnet50/openimages-simsiam-v2.h5",
             include_rescaling=True,
         ).as_backbone()
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
