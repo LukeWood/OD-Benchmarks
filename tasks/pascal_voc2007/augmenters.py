@@ -44,13 +44,13 @@ def get(augmenter, bounding_box_format):
                 keras_cv.layers.RandomFlip(
                     bounding_box_format="xywh",
                 ),
-                keras_cv.layers.RandomColorJitter(
-                    value_range=(0, 255),
-                    brightness_factor=(0.4,0.4),
-                    contrast_factor=0.0,
-                    saturation_factor=(0.7,0.7),
-                    hue_factor=(0.1,0.1),
-                ),
+                # keras_cv.layers.RandomColorJitter(
+                #     value_range=(0, 255),
+                #     brightness_factor=(0.4,0.4),
+                #     contrast_factor=0.0,
+                #     saturation_factor=(0.7,0.7),
+                #     hue_factor=(0.1,0.1),
+                # ),
                 keras_cv.layers.MixUp(alpha=0.5),
                 keras_cv.layers.Mosaic(bounding_box_format="xywh"),
             ]

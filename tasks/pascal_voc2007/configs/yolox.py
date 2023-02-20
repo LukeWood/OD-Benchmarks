@@ -9,6 +9,7 @@ def get_config():
     config.backbone = "keras_cv.models.CSPDarkNetTiny"
     config.batch_augment = True
     config.backbone_trainable = True
+    config.epochs = 300
 
     config.name = "yolox"
     return config
