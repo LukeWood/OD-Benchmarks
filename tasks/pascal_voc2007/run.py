@@ -181,7 +181,7 @@ def run(config):
     base_lr = 0.01 * config.batch_size / 64
     optimizer = tf.optimizers.SGD(
         learning_rate=base_lr,
-        decay=0.0005,
+        weight_decay=0.0005,
         momentum=0.01,
     )
 
