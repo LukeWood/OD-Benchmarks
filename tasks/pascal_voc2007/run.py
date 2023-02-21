@@ -60,6 +60,9 @@ def load_datasets(config, bounding_box_format):
     train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
     eval_ds = eval_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
 
+    train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+    eval_ds = eval_ds.prefetch(tf.data.AUTOTUNE)
+
     return train_ds, eval_ds
 
 
