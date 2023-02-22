@@ -5,7 +5,7 @@ def get_config():
     config = ml_collections.ConfigDict()
 
     config.batch_size = 16
-    config.augmenter = "kpl_yolox"
+    config.augmenter = "kpl"
     config.backbone = "keras_cv.models.CSPDarkNetTiny"
     config.batch_augment = True
     config.backbone_trainable = True

@@ -185,6 +185,7 @@ def run(config):
     optimizer = tf.optimizers.SGD(
         learning_rate=base_lr,
         weight_decay=0.0005,
+        global_clipnorm=10.0,
         momentum=0.01,
     )
 
