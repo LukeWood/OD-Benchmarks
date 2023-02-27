@@ -4,7 +4,7 @@ import ml_collections
 def get_config():
     config = ml_collections.ConfigDict()
 
-    config.batch_size = 16
+    config.batch_size = 32
     config.augmenter = "kpl"
     config.backbone = "keras_cv.models.CSPDarkNetTiny"
     config.batch_augment = True
