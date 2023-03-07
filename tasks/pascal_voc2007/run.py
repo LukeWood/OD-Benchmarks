@@ -1,6 +1,7 @@
 import os
 import resource
 import sys
+import math
 
 import augmenters
 import bocas
@@ -12,6 +13,7 @@ from absl import app, flags
 from keras_cv.callbacks import PyCOCOCallback
 from luketils import visualization
 from tensorflow import keras
+
 
 image_size = (640, 640, 3)
 
@@ -36,7 +38,7 @@ def load_datasets(config, bounding_box_format):
         640, 640, bounding_box_format=bounding_box_format, pad_to_aspect_ratio=True
     )
 
-    if config.augmenter == "kpl":
+    if config.augmenter == "kpl_yolox" or config.augmenter == "kpl":
         train_ds = train_ds.apply(
             tf.data.experimental.dense_to_ragged_batch(config.batch_size)
         )
@@ -57,6 +59,9 @@ def load_datasets(config, bounding_box_format):
 
     train_ds = train_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
     eval_ds = eval_ds.map(unpackage_dict_format, num_parallel_calls=tf.data.AUTOTUNE)
+
+    train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+    eval_ds = eval_ds.prefetch(tf.data.AUTOTUNE)
 
     return train_ds, eval_ds
 
@@ -90,11 +95,15 @@ def get_backbone(config):
             weights="gs://keras-cv/models/resnet50/openimages-simsiam-v3.h5",
             include_rescaling=True,
         ).as_backbone()
+    if config.backbone == "keras_cv.models.CSPDarkNetTiny":
+        return keras_cv.models.CSPDarkNetTiny(
+            include_rescaling=False, include_top=False,
+        ).as_backbone(min_level=3) 
     raise ValueError(f"Invalid backbone, received backbone={config.backbone}")
 
 
 def get_model(config):
-    model = keras_cv.models.RetinaNet(
+    model = keras_cv.models.YoloX_tiny(
         classes=20,
         bounding_box_format="xywh",
         backbone=get_backbone(config),
@@ -172,26 +181,58 @@ def run(config):
         eval_ds, bounding_box_format="xywh", path=f"{result_dir}/eval.png"
     )
 
-    base_lr = 0.01
-    lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
-        boundaries=[12000 * 16, 16000 * 16],
-        values=[base_lr, 0.1 * base_lr, 0.01 * base_lr],
-    )
-    optimizer = tf.keras.optimizers.SGD(
-        learning_rate=lr_decay, momentum=0.9, global_clipnorm=10.0
+    base_lr = 0.01 * config.batch_size / 64
+    optimizer = tf.optimizers.SGD(
+        learning_rate=base_lr,
+        weight_decay=0.0005,
+        global_clipnorm=10.0,
+        momentum=0.01,
     )
 
     model.compile(
-        classification_loss="focal",
-        box_loss="smoothl1",
+        classification_loss="binary_crossentropy",
+        objectness_loss="binary_crossentropy",
+        box_loss="iou",
         optimizer=optimizer,
     )
+
+    def get_lr_callback(batch_size=8):
+        lr_start = 1e-6
+        lr_max = 0.01 * (batch_size / 64)
+        lr_min = lr_max * 0.05
+        warmup_epochs = 5
+        no_aug_iter = 15
+
+        def lrfn(epoch):
+            if epoch <= warmup_epochs:
+                lr = (lr_max - lr_start) * pow((epoch / warmup_epochs), 2) + lr_start
+
+            elif epoch >= config.epochs - no_aug_iter:
+                lr = lr_min
+
+            else:
+                lr = lr_min + 0.5 * (lr_max - lr_min) * (
+                    1.0
+                    + math.cos(
+                        math.pi
+                        * (epoch - warmup_epochs)
+                        / (config.epochs - warmup_epochs - no_aug_iter)
+                    )
+                )
+            return lr
+
+        lr_callback = tf.keras.callbacks.LearningRateScheduler(lrfn, verbose=False)
+        return lr_callback
 
     history = model.fit(
         train_ds,
         validation_data=eval_ds,
-        epochs=50,
-        callbacks=[PyCOCOCallback(eval_ds, "xywh"), keras.callbacks.TerminateOnNaN()],
+        epochs=config.epochs,
+        callbacks=[
+            PyCOCOCallback(eval_ds, "xywh"),
+            keras.callbacks.TerminateOnNaN(),
+            get_lr_callback(config.batch_size),
+        ],
     )
     # metrics = model.evaluate(eval_ds, return_dict=True)
     return bocas.Result(

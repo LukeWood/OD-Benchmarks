@@ -17,6 +17,11 @@ def unpackage_tfds_inputs(inputs, bounding_box_format):
     }
     return {"images": tf.cast(image, tf.float32), "bounding_boxes": bounding_boxes}
 
+def resize(inputs):
+    inputs["image"] = tf.image.resize(inputs["image"], (640, 640))
+    inputs["image"] = tf.reshape(inputs["image"], [640, 640, 3])
+    return inputs
+
 
 def load(split, bounding_box_format):
     if split == "train":
@@ -32,6 +37,7 @@ def load(split, bounding_box_format):
                 shuffle_files=True,
             )
         )
+        ds = ds.map(resize)
     if split == "test":
         ds = tfds.load("voc/2007", split="test", with_info=False)
 
